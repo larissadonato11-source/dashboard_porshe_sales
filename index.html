@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PORSCHE | Executive Sales Intelligence</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        porsche: {
+                            black: '#000000',
+                            dark: '#0a0a0a',
+                            surface: '#121214',
+                            card: '#18181b',
+                            border: '#27272a',
+                            borderHover: '#3f3f46',
+                            red: '#d5001c',
+                            redHover: '#b80017',
+                            grayText: '#a1a1aa',
+                            lightText: '#f4f4f5'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0a0a0a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #27272a;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #d5001c;
+        }
+        body {
+            background-color: #000000;
+            color: #f4f4f5;
+            font-family: 'Inter', sans-serif;
+        }
+        .glass-panel {
+            background: rgba(24, 24, 27, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+    </style>
+</head>
+<body class="bg-porsche-black text-porsche-lightText min-h-screen flex flex-col selection:bg-porsche-red selection:text-white">
+
+    <!-- HEADER -->
+    <header class="border-b border-porsche-border bg-porsche-dark/95 sticky top-0 z-50 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+                <div class="w-10 h-10 flex items-center justify-center bg-porsche-red rounded-sm shadow-md">
+                    <svg class="w-7 h-7 text-white" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2L4 7v10l8 5 8-5V7l-8-5zm0 2.2l5.5 3.45v7.7l-5.5 3.45-5.5-3.45V7.65L12 4.2z"/>
+                        <path d="M12 7l-3 4h2v6h2v-6h2l-3-4z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold tracking-widest text-white uppercase flex items-center gap-2">
+                        PORSCHE <span class="text-porsche-red font-light text-sm tracking-normal">| Executive Sales Intelligence</span>
+                    </h1>
+                    <p class="text-xs text-porsche-grayText tracking-wider">BRAZIL PERFORMANCE & ANALYTICS DASHBOARD</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center space-x-4">
+                <div class="hidden md:flex items-center space-x-2 bg-porsche-surface px-3 py-1.5 rounded-full border border-porsche-border text-xs text-porsche-grayText">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span>100 Registros Consolidados (2024-2027)</span>
+                </div>
+                <button onclick="resetFilters()" class="bg-porsche-surface hover:bg-porsche-border text-xs text-white px-3 py-2 rounded transition border border-porsche-border flex items-center gap-1.5">
+                    <i class="fa-solid fa-rotate-right text-porsche-red"></i> Limpar Filtros
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- FILTERS BAR -->
+    <section class="border-b border-porsche-border bg-porsche-surface/70 py-4 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+            <!-- Model Filter -->
+            <div>
+                <label class="block text-xs font-medium text-porsche-grayText uppercase tracking-wider mb-1">Modelo da Porsche</label>
+                <select id="filterModel" onchange="applyFilters()" class="w-full bg-porsche-card border border-porsche-border rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-porsche-red transition">
+                    <option value="ALL">Todos os Modelos</option>
+                </select>
+            </div>
+            <!-- Model Year Filter -->
+            <div>
+                <label class="block text-xs font-medium text-porsche-grayText uppercase tracking-wider mb-1">Ano de Venda</label>
+                <select id="filterYear" onchange="applyFilters()" class="w-full bg-porsche-card border border-porsche-border rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-porsche-red transition">
+                    <option value="ALL">Todos os Anos</option>
+                </select>
+            </div>
+            <!-- City Filter -->
+            <div>
+                <label class="block text-xs font-medium text-porsche-grayText uppercase tracking-wider mb-1">Cidade</label>
+                <select id="filterCity" onchange="applyFilters()" class="w-full bg-porsche-card border border-porsche-border rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-porsche-red transition">
+                    <option value="ALL">Todas as Cidades</option>
+                </select>
+            </div>
+            <!-- Pay Method Filter -->
+            <div>
+                <label class="block text-xs font-medium text-porsche-grayText uppercase tracking-wider mb-1">Método de Pagamento</label>
+                <select id="filterPay" onchange="applyFilters()" class="w-full bg-porsche-card border border-porsche-border rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-porsche-red transition">
+                    <option value="ALL">Todos os Métodos</option>
+                </select>
+            </div>
+            <!-- Active Filters Summary -->
+            <div class="flex flex-col justify-end">
+                <div class="bg-porsche-card border border-porsche-border rounded px-3 py-2 flex items-center justify-between text-xs">
+                    <span class="text-porsche-grayText">Vendas Filtradas:</span>
+                    <span id="recordCount" class="font-bold text-porsche-red text-base">100</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- MAIN CONTENT -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow w-full space-y-8">
+        
+        <!-- KPI CARDS -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div class="glass-panel p-6 rounded-xl border border-porsche-border relative overflow-hidden group hover:border-porsche-red/50 transition">
+                <p class="text-xs font-medium text-porsche-grayText uppercase tracking-wider">Volume de Vendas</p>
+                <h3 id="kpiVolume" class="text-3xl font-extrabold text-white mt-2">0</h3>
+                <p class="text-xs text-emerald-400 mt-2 flex items-center gap-1">
+                    <i class="fa-solid fa-car"></i> Unidades Comercializadas
+                </p>
+            </div>
+            <div class="glass-panel p-6 rounded-xl border border-porsche-border relative overflow-hidden group hover:border-porsche-red/50 transition">
+                <p class="text-xs font-medium text-porsche-grayText uppercase tracking-wider">Faturamento Total</p>
+                <h3 id="kpiRevenue" class="text-3xl font-extrabold text-white mt-2">US$ 0</h3>
+                <p class="text-xs text-emerald-400 mt-2 flex items-center gap-1">
+                    <i class="fa-solid fa-chart-line"></i> Receita Bruta Consolidada
+                </p>
+            </div>
+            <div class="glass-panel p-6 rounded-xl border border-porsche-border relative overflow-hidden group hover:border-porsche-red/50 transition">
+                <p class="text-xs font-medium text-porsche-grayText uppercase tracking-wider">Preço Médio por Veículo</p>
+                <h3 id="kpiAvgPrice" class="text-3xl font-extrabold text-white mt-2">US$ 0</h3>
+                <p class="text-xs text-porsche-grayText mt-2 flex items-center gap-1">
+                    <i class="fa-solid fa-tag"></i> Ticket Médio do Portfólio
+                </p>
+            </div>
+            <div class="glass-panel p-6 rounded-xl border border-porsche-border relative overflow-hidden group hover:border-porsche-red/50 transition">
+                <p class="text-xs font-medium text-porsche-grayText uppercase tracking-wider">Modelo Mais Vendido</p>
+                <h3 id="kpiTopModel" class="text-2xl font-bold text-porsche-red mt-2">-</h3>
+                <p id="kpiTopModelSub" class="text-xs text-porsche-grayText mt-2">0 unidades comercializadas</p>
+            </div>
+        </div>
+
+        <!-- BUSINESS QUESTIONS 1 & 2 -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Q1: Modelos por Cidade -->
+            <div class="glass-panel p-6 rounded-xl border border-porsche-border flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-bold text-porsche-red uppercase tracking-widest">Pergunta de Negócio 01</span>
+                        <i class="fa-solid fa-city text-porsche-grayText"></i>
+                    </div>
+                    <h2 class="text-lg font-bold text-white mb-1">Principais Modelos Vendidos por Cidade</h2>
+                    <p class="text-xs text-porsche-grayText mb-4">Volume e preferência de família de modelos por praça regional.</p>
+                </div>
+                <div class="relative h-72 w-full">
+                    <canvas id="chartModelsByCity"></canvas>
+                </div>
+            </div>
+
+            <!-- Q2: Modelo Líder por Período & Ranking -->
+            <div class="glass-panel p-6 rounded-xl border border-porsche-border flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-bold text-porsche-red uppercase tracking-widest">Pergunta de Negócio 02</span>
+                        <i class="fa-solid fa-trophy text-porsche-grayText"></i>
+                    </div>
+                    <h2 class="text-lg font-bold text-white mb-1">Modelo Mais Vendido no Período Filtrado</h2>
+                    <p class="text-xs text-porsche-grayText mb-4">Ranking dinâmico de participação de vendas e faturamento total.</p>
+                </div>
+                <div id="rankingContainer" class="space-y-3 my-2 overflow-y-auto max-h-64 pr-2">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Q3: Insights de Carros Populares por Cidade -->
+        <div class="glass-panel p-6 rounded-xl border border-porsche-border">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <span class="text-xs font-bold text-porsche-red uppercase tracking-widest">Pergunta de Negócio 03</span>
+                    <h2 class="text-lg font-bold text-white mt-1">Insights Regionais de Preferência de Vendas</h2>
+                    <p class="text-xs text-porsche-grayText">Análise automatizada de maior demanda, modelo popular e perfil por cidade.</p>
+                </div>
+                <div class="bg-porsche-red/10 border border-porsche-red/30 px-3 py-1.5 rounded-lg flex items-center gap-2">
+                    <i class="fa-solid fa-microchip text-porsche-red"></i>
+                    <span class="text-xs font-semibold text-white">AI Regional Intelligence</span>
+                </div>
+            </div>
+            
+            <div id="cityInsightsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
+                <!-- Dynamically populated insight cards -->
+            </div>
+        </div>
+
+        <!-- BUSINESS QUESTIONS 4 & 5 -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Q4: Método de Pagamento por Faixa de Preço & Modelo -->
+            <div class="glass-panel p-6 rounded-xl border border-porsche-border flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-bold text-porsche-red uppercase tracking-widest">Pergunta de Negócio 04 (Nova)</span>
+                        <i class="fa-solid fa-credit-card text-porsche-grayText"></i>
+                    </div>
+                    <h2 class="text-lg font-bold text-white mb-1">Preferência de Pagamento por Faixa de Preço</h2>
+                    <p class="text-xs text-porsche-grayText mb-4">Distribuição de À Vista, Financiamento e Leasing (&lt;$100k, $100k-$180k, &gt;$180k).</p>
+                </div>
+                <div class="relative h-72 w-full">
+                    <canvas id="chartPaymentByPriceTier"></canvas>
+                </div>
+            </div>
+
+            <!-- Q5: Evolução Temporal por Modelo (Faturamento e Volume) -->
+            <div class="glass-panel p-6 rounded-xl border border-porsche-border flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-bold text-porsche-red uppercase tracking-widest">Pergunta de Negócio 05 (Nova)</span>
+                        <i class="fa-solid fa-chart-line text-porsche-grayText"></i>
+                    </div>
+                    <h2 class="text-lg font-bold text-white mb-1">Evolução de Faturamento Anual por Modelo</h2>
+                    <p class="text-xs text-porsche-grayText mb-4">Trajetória de receita acumulada (2024 - 2027) para cada linha Porsche.</p>
+                </div>
+                <div class="relative h-72 w-full">
+                    <canvas id="chartEvolutionByModel"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- TRANSACTIONS TABLE -->
+        <div class="glass-panel rounded-xl border border-porsche-border overflow-hidden">
+            <div class="p-6 border-b border-porsche-border flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div>
+                    <h2 class="text-lg font-bold text-white">Base de Transações Detalhada</h2>
+                    <p class="text-xs text-porsche-grayText">Consolidado das vendas oficiais da Porsche no Brasil.</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span id="tableCount" class="text-xs bg-porsche-surface px-3 py-1 rounded border border-porsche-border text-porsche-grayText">100 transações</span>
+                </div>
+            </div>
+            <div class="overflow-x-auto max-h-96">
+                <table class="w-full text-left border-collapse">
+                    <thead class="sticky top-0 bg-porsche-surface text-porsche-grayText text-xs uppercase tracking-wider border-b border-porsche-border z-10">
+                        <tr>
+                            <th class="py-3 px-4">ID Transação</th>
+                            <th class="py-3 px-4">Data</th>
+                            <th class="py-3 px-4">Modelo</th>
+                            <th class="py-3 px-4">Versão / Especificação</th>
+                            <th class="py-3 px-4">Preço (US$)</th>
+                            <th class="py-3 px-4">Cidade</th>
+                            <th class="py-3 px-4">Método Pagamento</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody" class="divide-y divide-porsche-border text-sm text-porsche-lightText">
+                        <!-- Populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="border-t border-porsche-border bg-porsche-dark py-6 mt-12 text-center text-xs text-porsche-grayText">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p>&copy; 2026 Dr. Ing. h.c. F. Porsche AG / Porsche Brasil. Executive Analytics System.</p>
+            <div class="flex space-x-6">
+                <a href="https://www.porsche.com/brazil/pt/" target="_blank" class="hover:text-white transition">Porsche Brasil Official</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Full Synthetic Dataset representing the 100 sales records (2024 - 2027)
+        const rawData = [
+            { id: "POR-001", date: "2024-01-15", model: "911", version: "911 Carrera S", price: 135000, city: "São Paulo", payMethod: "À Vista" },
+            { id: "POR-002", date: "2024-02-10", model: "Taycan", version: "Taycan 4S", price: 118000, city: "Rio de Janeiro", payMethod: "Financiamento" },
+            { id: "POR-003", date: "2024-02-28", model: "Cayenne", version: "Cayenne E-Hybrid", price: 105000, city: "Belo Horizonte", payMethod: "Leasing" },
+            { id: "POR-004", date: "2024-03-12", model: "Macan", version: "Macan GTS", price: 89000, city: "Curitiba", payMethod: "À Vista" },
+            { id: "POR-005", date: "2024-04-05", model: "718", version: "718 Cayman GT4", price: 112000, city: "São Paulo", payMethod: "Financiamento" },
+            { id: "POR-006", date: "2024-04-20", model: "Panamera", version: "Panamera 4S", price: 128000, city: "Brasília", payMethod: "À Vista" },
+            { id: "POR-007", date: "2024-05-14", model: "911", version: "911 Turbo S", price: 230000, city: "São Paulo", payMethod: "À Vista" },
+            { id: "POR-008", date: "2024-06-01", model: "Taycan", version: "Taycan Turbo", price: 156200.5, city: "Porto Alegre", payMethod: "Financiamento" },
+            { id: "POR-009", date: "2024-06-18", model: "Cayenne", version: "Cayenne Turbo GT", price: 195000, city: "Goiânia", payMethod: "À Vista" },
+            { id: "POR-010", date: "2024-07-09", model: "Macan", version: "Macan T", price: 74900, city: "São Paulo", payMethod: "Leasing" },
+            { id: "POR-011", date: "2024-08-02", model: "718", version: "718 Boxster GTS", price: 98000, city: "Florianópolis", payMethod: "Financiamento" },
+            { id: "POR-012", date: "2024-08-22", model: "911", version: "911 GT3", price: 185000, city: "Rio de Janeiro", payMethod: "À Vista" },
+            { id: "POR-013", date: "2024-09-11", model: "Panamera", version: "Panamera GTS", price: 108500, city: "São Paulo", payMethod: "Leasing" },
+            { id: "POR-014", date: "2024-10-04", model: "Cayenne", version: "Cayenne Coupe", price: 90500, city: "Campinas", payMethod: "Financiamento" },
+            { id: "POR-015", date: "2024-11-15", model: "911", version: "911 Carrera Cabriolet", price: 150100, city: "São Paulo", payMethod: "À Vista" },
+            { id: "POR-016", date: "2024-12-08", model: "718", version: "718 Spyder", price: 112000, city: "Curitiba", payMethod: "À Vista" },
+            { id: "POR-017", date: "2025-01-10", model: "Taycan", version: "Taycan GTS", price: 134000, city: "São Paulo", payMethod: "À Vista" },
+            { id: "POR-018", date: "2025-01-25", model: "911", version: "911 Targa 4S", price: 162000, city: "Brasília", payMethod: "Financiamento" },
+            { id: "POR-019", date: "2025-02-04", model: "Macan", version: "Macan GTS", price: 92000, city: "Rio de Janeiro", payMethod: "Leasing" },
+            { id: "POR-020", date: "2025-02-18", model: "Cayenne", version: "Cayenne S", price: 110000, city: "São Paulo", payMethod: "À Vista" },
+            { id: "POR-021", date: "2025-03-05", model: "Panamera", version: "Panamera Turbo E-Hybrid", price: 188000, city: "Belo Horizonte", payMethod: "Financiamento" },
+            { id: "POR-022", date: "2025-03-21", model: "718", version: "718 Cayman S", price: 88000, city: "São Paulo", payMethod: "À Vista" },
+            { id: "POR-023", date: "2025-04-02", model: "911", version: "911 GT3 RS", price: 285000, city: "São Paulo", payMethod: "À Vista" },
+            { id: "POR-024", date: "2025-04-19", model: "Taycan", version: "Taycan Cross Turismo", price: 122000, city: "Curitiba", payMethod: "Financiamento" },
+            { id: "POR-025", date: "2025-05-08", model: "Macan", version: "Macan EV", price: 84000, city: "Florianópolis", payMethod: "À Vista" },
+            { id: "POR-026", date: "2025-05-27", model: "Cayenne", version: "Cayenne GTS", price: 128000, city: "Rio de Janeiro", payMethod: "Leasing" },
+            { id: "POR-027", date: "2025-06-12", model: "911", version: "911 Dakar", price: 242000, city: "Goiânia", payMethod: "À Vista" },
+            { id: "POR-028", date: "2025-06-29", model: "Panamera", version: "Panamera 4 Platinum", price: 105000, city: "São Paulo", payMethod: "Financiamento" },
+            { id: "POR-029", date: "2025-07-14", model: "Taycan", version: "Taycan Turbo S", price: 210000, city: "São Paulo", payMethod: "À Vista" },
+            { id: "POR-030", date: "2025-08-01", model: "718", version: "718 Cayman GT4 RS", price: 178000, city: "Brasília", payMethod: "À Vista" },
+            { id: "POR-031", date: "2025-08-18", model: "Macan", version: "Macan GTS", price: 91000, city: "Porto Alegre", payMethod: "Leasing" },
+            { id: "POR-032", date: "2025-09-03", model: "911", version: "911 Carrera GTS", price: 168000, city: "São Paulo", payMethod: "Financiamento" },
+            { id: "POR-033", date: "2025-09-22", model: "Cayenne", version: "Cayenne E-Hybrid", price: 102000, city: "Campinas", payMethod: "À Vista" },
+            { id: "POR-034", date: "2025-10-10", model: "Taycan", version: "Taycan 4S", price: 124000, city: "Belo Horizonte", payMethod: "Financiamento" },
+            { id: "POR-035", date: "2025-10-28", model: "Panamera", version: "Panamera GTS", price: 115000, city: "Rio de Janeiro", payMethod: "À Vista" },
+            { id: "POR-036", date: "2025-11-12", model: "911", version: "911 Turbo", price: 202000, city: "São Paulo", payMethod: "À Vista" },
+            { id: "POR-037", date: "2025-11-30", model: "718", version: "718 Boxster S", price: 85600, city: "Curitiba", payMethod: "Leasing" },
+            { id: "POR-038", date: "2025-12-15", model: "Taycan", version: "Taycan Sport Turismo", price: 150100, city: "São Paulo", payMethod: "Financiamento" },
+            { id: "POR-039", date: "2025-12-22", model: "Cayenne", version: "Cayenne Coupe S", price: 118700, city: "Brasília", payMethod: "À Vista" },
+            { id: "POR-040", date: "2025-12-29", model: "911", version: "911 Carrera 4S", price: 140200, city: "Rio de Janeiro", payMethod: "Financiamento" },
+            { id: "POR-041", date: "2025-12-31", model: "Panamera", version: "Panamera 4", price: 101250, city: "São Paulo", payMethod: "Leasing" },
+            { id: "POR-042", date: "2025-12-31", model: "Macan", version: "Macan Standard", price: 67900, city: "Goiânia", payMethod: "À Vista" },
+            { id: "POR-043", date: "2026-01-08", model: "911", version: "911 GT3", price: 192000, city: "São Paulo", payMethod: "À Vista" },
+            { id: "POR-044", date: "2026-01-19", model: "Taycan", version: "Taycan GTS", price: 138000, city: "Rio de Janeiro", payMethod: "Financiamento" },
+            { id: "POR-045", date: "2026-02-02", model: "Cayenne", version: "Cayenne Turbo GT", price: 205000, city: "São Paulo", payMethod: "À Vista" },
+            { id: "POR-046", date: "2026-02-14", model: "Macan", version: "Macan EV Turbo", price: 108000, city: "Curitiba", payMethod: "Financiamento" },
+            { id: "POR-047", date: "2026-03-01", model: "718", version: "718 Cayman GT4 RS", price: 182000, city: "Florianópolis", payMethod: "À Vista" },
+            { id: "POR-048", date: "2026-03-15", model: "Panamera", version: "Panamera GTS", price: 118000, city: "São Paulo", payMethod: "Leasing" },
+            { id: "POR-049", date: "2026-03-29", model: "911", version: "911 Turbo S", price: 238000, city: "Brasília", payMethod: "À Vista" },
+            { id: "POR-050", date: "2026-04-10", model: "Taycan", version: "Taycan Cross Turismo 4S", price: 129000, city: "Porto Alegre", payMethod: "Financiamento" },
+            { id: "POR-051", date: "2026-04-25", model: "Cayenne", version: "Cayenne E-Hybrid", price: 108000, city: "São Paulo", payMethod: "Leasing" },
+            { id: "POR-052", date: "2026-05-05", model: "Macan", version: "Macan GTS", price: 94000, city: "Campinas", payMethod: "À Vista" },
+            { id: "POR-053", date: "2026-05-18", model: "911", version: "911 Carrera T", price: 129000, city: "Rio de Janeiro", payMethod: "Financiamento" },
+            { id: "POR-054", date: "2026-06-02", model: "718", version: "718 Boxster GTS", price: 101000, city: "Goiânia", payMethod: "À Vista" },
+            { id: "POR-055", date: "2026-06-16", model: "Panamera", version: "Panamera Turbo S E-Hybrid", price: 196000, city: "São Paulo", payMethod: "À Vista" },
+            { id: "POR-056", date: "2026-07-01", model: "Taycan", version: "Taycan Turbo S", price: 215000, city: "São Paulo", payMethod: "À Vista" },
+            { id: "POR-057", date: "2026-07-15", model: "Cayenne", version: "Cayenne S Coupe", price: 122000, city: "Belo Horizonte", payMethod: "Financiamento" },
+            { id: "POR-058", date: "2026-07-28", model: "Macan", version: "Macan T", price: 76500, city: "São Paulo", payMethod: "Leasing" },
+            { id: "POR-059", date: "2026-08-10", model: "911", version: "911 Targa 4 GTS", price: 175500, city: "Curitiba", payMethod: "Financiamento" },
+            { id: "POR-060", date: "2026-08-22", model: "Taycan", version: "Taycan 4S", price: 126900, city: "Brasília", payMethod: "Leasing" },
+            { id: "POR-061", date: "2026-09-04", model: "718", version: "718 Style Edition", price: 78550, city: "Rio de Janeiro", payMethod: "À Vista" },
+            { id: "POR-062", date: "2026-09-19", model: "Cayenne", version: "Cayenne GTS", price: 132000, city: "São Paulo", payMethod: "À Vista" },
+            { id: "POR-063", date: "2026-10-02", model: "Panamera", version: "Panamera 4S", price: 131000, city: "Porto Alegre", payMethod: "Financiamento" },
+            { id: "POR-064", date: "2026-10-15", model: "Macan", version: "Macan EV", price: 86500, city: "São Paulo", payMethod: "Financiamento" },
+            { id: "POR-065", date: "2026-10-29", model: "911", version: "911 GT3 RS", price: 292000, city: "São Paulo", payMethod: "À Vista" },
+            { id: "POR-066", date: "2026-11-10", model: "Cayenne", version: "Cayenne Coupe", price: 94600, city: "Florianópolis", payMethod: "Leasing" },
+            { id: "POR-067", date: "2026-11-23", model: "Taycan", version: "Taycan Base", price: 104000, city: "Goiânia", payMethod: "Financiamento" },
+            { id: "POR-068", date: "2026-12-05", model: "718", version: "718 Cayman S", price: 59000, city: "São Paulo", payMethod: "À Vista" },
+            { id: "POR-069", date: "2026-12-18", model: "Macan", version: "Macan S", price: 81850, city: "Belo Horizonte", payMethod: "Financiamento" },
+            { id: "POR-070", date: "2026-12-22", model: "Panamera", version: "Panamera 4 Executive", price: 109200, city: "Brasília", payMethod: "Leasing" },
+            { id: "POR-071", date: "2026-12-28", model: "Cayenne", version: "Cayenne E-Hybrid Coupe", price: 115000, city: "Rio de Janeiro", payMethod: "À Vista" },
+            { id: "POR-072", date: "2026-12-30", model: "Macan", version: "Macan GTS", price: 95000, city: "Curitiba", payMethod: "Financiamento" },
+            { id: "POR-073", date: "2026-12-31", model: "911", version: "911 Carrera", price: 121250, city: "São Paulo", payMethod: "À Vista" },
+            { id: "POR-074", date: "2026-12-31", model: "Taycan", version: "Taycan GTS", price: 145000, city: "Campinas", payMethod: "Financiamento" },
+            { id: "POR-075", date: "2026-12-31", model: "Macan", version: "Macan EV Turbo", price: 112000, city: "São Paulo", payMethod: "Leasing" },
+            { id: "POR-076", date: "2026-12-31", model: "Panamera", version: "Panamera 4", price: 99000, city: "Rio de Janeiro", payMethod: "Financiamento" },
+            { id: "POR-077", date: "2026-12-31", model: "Cayenne", version: "Cayenne Standard", price: 89000, city: "São Paulo", payMethod: "À Vista" },
+            { id: "POR-078", date: "2026-12-31", model: "911", version: "911 Sport Classic", price: 280000, city: "São Paulo", payMethod: "À Vista" },
+            { id: "POR-079", date: "2027-01-10", model: "911", version: "911 GT3", price: 198000, city: "São Paulo", payMethod: "À Vista" },
+            { id: "POR-080", date: "2027-01-22", model: "Taycan", version: "Taycan Cross Turismo", price: 128000, city: "Rio de Janeiro", payMethod: "Financiamento" },
+            { id: "POR-081", date: "2027-02-05", model: "Cayenne", version: "Cayenne Turbo GT", price: 210000, city: "Brasília", payMethod: "À Vista" },
+            { id: "POR-082", date: "2027-02-18", model: "Macan", version: "Macan EV", price: 88000, city: "São Paulo", payMethod: "Leasing" },
+            { id: "POR-083", date: "2027-03-02", model: "718", version: "718 Cayman GT4 RS", price: 188000, city: "Curitiba", payMethod: "À Vista" },
+            { id: "POR-084", date: "2027-03-15", model: "Panamera", version: "Panamera Turbo E-Hybrid", price: 192000, city: "São Paulo", payMethod: "Financiamento" },
+            { id: "POR-085", date: "2027-04-01", model: "911", version: "911 Turbo S", price: 245000, city: "São Paulo", payMethod: "À Vista" },
+            { id: "POR-086", date: "2027-04-18", model: "Cayenne", version: "Cayenne E-Hybrid", price: 109000, city: "Belo Horizonte", payMethod: "Financiamento" },
+            { id: "POR-087", date: "2027-05-04", model: "Macan", version: "Macan GTS", price: 96000, city: "Goiânia", payMethod: "À Vista" },
+            { id: "POR-088", date: "2027-05-20", model: "911", version: "911 Carrera GTS", price: 172000, city: "Rio de Janeiro", payMethod: "Financiamento" },
+            { id: "POR-089", date: "2027-06-08", model: "Taycan", version: "Taycan Turbo S", price: 220000, city: "São Paulo", payMethod: "À Vista" },
+            { id: "POR-090", date: "2027-06-25", model: "Panamera", version: "Panamera GTS", price: 121000, city: "Porto Alegre", payMethod: "Leasing" },
+            { id: "POR-091", date: "2027-07-12", model: "718", version: "718 Boxster Style", price: 80000, city: "Florianópolis", payMethod: "Financiamento" },
+            { id: "POR-092", date: "2027-07-29", model: "Cayenne", version: "Cayenne Coupe S", price: 125850, city: "São Paulo", payMethod: "À Vista" },
+            { id: "POR-093", date: "2027-08-14", model: "911", version: "911 Carrera S", price: 139000, city: "Brasília", payMethod: "Financiamento" },
+            { id: "POR-094", date: "2027-08-30", model: "Macan", version: "Macan Standard", price: 71000, city: "Campinas", payMethod: "Leasing" },
+            { id: "POR-095", date: "2027-09-11", model: "Cayenne", version: "Cayenne GTS", price: 135000, city: "Rio de Janeiro", payMethod: "À Vista" },
+            { id: "POR-096", date: "2027-09-28", model: "911", version: "911 GT3 RS", price: 298000, city: "São Paulo", payMethod: "À Vista" },
+            { id: "POR-097", date: "2027-10-05", model: "Taycan", version: "Taycan 4S", price: 129500, city: "Curitiba", payMethod: "Financiamento" },
+            { id: "POR-098", date: "2027-10-20", model: "Panamera", version: "Panamera 4S", price: 134500, city: "São Paulo", payMethod: "Leasing" },
+            { id: "POR-099", date: "2027-11-02", model: "Macan", version: "Macan EV Turbo", price: 114000, city: "Belo Horizonte", payMethod: "Financiamento" },
+            { id: "POR-100", date: "2027-11-18", model: "718", version: "718 Cayman S", price: 91000, city: "São Paulo", payMethod: "À Vista" }
+        ];
+
+        // Chart Instance Handles
+        let chartModelsByCityInstance = null;
+        let chartPaymentByPriceTierInstance = null;
+        let chartEvolutionByModelInstance = null;
+
+        window.onload = function() {
+            populateFilters();
+            applyFilters();
+        };
+
+        function populateFilters() {
+            const models = [...new Set(rawData.map(item => item.model))].sort();
+            const years = [...new Set(rawData.map(item => item.date.substring(0, 4)))].sort((a,b) => a - b);
+            const cities = [...new Set(rawData.map(item => item.city))].sort();
+            const pays = [...new Set(rawData.map(item => item.payMethod))].sort();
+
+            const modelSel = document.getElementById('filterModel');
+            models.forEach(m => modelSel.innerHTML += `<option value="${m}">${m}</option>`);
+
+            const yearSel = document.getElementById('filterYear');
+            years.forEach(y => yearSel.innerHTML += `<option value="${y}">${y}</option>`);
+
+            const citySel = document.getElementById('filterCity');
+            cities.forEach(c => citySel.innerHTML += `<option value="${c}">${c}</option>`);
+
+            const paySel = document.getElementById('filterPay');
+            pays.forEach(p => paySel.innerHTML += `<option value="${p}">${p}</option>`);
+        }
+
+        function resetFilters() {
+            document.getElementById('filterModel').value = 'ALL';
+            document.getElementById('filterYear').value = 'ALL';
+            document.getElementById('filterCity').value = 'ALL';
+            document.getElementById('filterPay').value = 'ALL';
+            applyFilters();
+        }
+
+        function applyFilters() {
+            const selModel = document.getElementById('filterModel').value;
+            const selYear = document.getElementById('filterYear').value;
+            const selCity = document.getElementById('filterCity').value;
+            const selPay = document.getElementById('filterPay').value;
+
+            const filtered = rawData.filter(item => {
+                if (selModel !== 'ALL' && item.model !== selModel) return false;
+                if (selYear !== 'ALL' && item.date.substring(0, 4) !== selYear) return false;
+                if (selCity !== 'ALL' && item.city !== selCity) return false;
+                if (selPay !== 'ALL' && item.payMethod !== selPay) return false;
+                return true;
+            });
+
+            updateKPIs(filtered);
+            updateTable(filtered);
+            updateRanking(filtered);
+            updateCityInsights(filtered);
+            updateCharts(filtered);
+        }
+
+        function formatCurrency(val) {
+            return 'US$ ' + val.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+        }
+
+        function updateKPIs(data) {
+            const count = data.length;
+            document.getElementById('recordCount').innerText = count;
+
+            const totalRevenue = data.reduce((acc, curr) => acc + curr.price, 0);
+            const avgPrice = count > 0 ? totalRevenue / count : 0;
+
+            // Top Model in filtered dataset
+            const modelCounts = {};
+            data.forEach(i => modelCounts[i.model] = (modelCounts[i.model] || 0) + 1);
+            let topModel = Object.keys(modelCounts).length > 0 
+                ? Object.keys(modelCounts).reduce((a, b) => modelCounts[a] > modelCounts[b] ? a : b) 
+                : 'Nenhum';
+
+            document.getElementById('kpiVolume').innerText = count;
+            document.getElementById('kpiRevenue').innerText = formatCurrency(totalRevenue);
+            document.getElementById('kpiAvgPrice').innerText = formatCurrency(avgPrice);
+            document.getElementById('kpiTopModel').innerText = topModel;
+            document.getElementById('kpiTopModelSub').innerText = count > 0 ? `${modelCounts[topModel] || 0} unidades comercializadas` : 'Sem dados';
+        }
+
+        function updateRanking(data) {
+            const container = document.getElementById('rankingContainer');
+            container.innerHTML = '';
+
+            if (data.length === 0) {
+                container.innerHTML = `<p class="text-xs text-porsche-grayText py-4">Nenhum veículo encontrado para os filtros selecionados.</p>`;
+                return;
+            }
+
+            const modelStats = {};
+            data.forEach(item => {
+                if (!modelStats[item.model]) modelStats[item.model] = { count: 0, revenue: 0 };
+                modelStats[item.model].count += 1;
+                modelStats[item.model].revenue += item.price;
+            });
+
+            const sorted = Object.keys(modelStats).map(m => ({
+                model: m,
+                count: modelStats[m].count,
+                revenue: modelStats[m].revenue
+            })).sort((a, b) => b.count - a.count || b.revenue - a.revenue);
+
+            const totalVol = data.length;
+
+            sorted.forEach((item, index) => {
+                const share = Math.round((item.count / totalVol) * 100);
+                container.innerHTML += `
+                    <div class="bg-porsche-card p-3 rounded-lg border border-porsche-border flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <span class="w-6 h-6 flex items-center justify-center rounded-full text-xs font-bold ${index === 0 ? 'bg-porsche-red text-white' : 'bg-porsche-border text-porsche-grayText'}">
+                                ${index + 1}
+                            </span>
+                            <div>
+                                <h4 class="text-sm font-bold text-white">${item.model}</h4>
+                                <p class="text-xs text-porsche-grayText">${item.count} unidades (${share}% das vendas)</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-sm font-bold text-white">${formatCurrency(item.revenue)}</span>
+                            <p class="text-xs text-porsche-grayText">Méd: ${formatCurrency(item.revenue / item.count)}</p>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function updateCityInsights(data) {
+            const container = document.getElementById('cityInsightsContainer');
+            container.innerHTML = '';
+
+            if (data.length === 0) {
+                container.innerHTML = `<p class="col-span-4 text-xs text-porsche-grayText">Sem dados disponíveis para gerar insights regionais.</p>`;
+                return;
+            }
+
+            const cityData = {};
+            data.forEach(item => {
+                if (!cityData[item.city]) cityData[item.city] = { count: 0, revenue: 0, models: {}, payMethods: {} };
+                cityData[item.city].count += 1;
+                cityData[item.city].revenue += item.price;
+                cityData[item.city].models[item.model] = (cityData[item.city].models[item.model] || 0) + 1;
+                cityData[item.city].payMethods[item.payMethod] = (cityData[item.city].payMethods[item.payMethod] || 0) + 1;
+            });
+
+            // Top 4 cities by volume
+            const sortedCities = Object.keys(cityData).sort((a, b) => cityData[b].count - cityData[a].count).slice(0, 4);
+
+            sortedCities.forEach(city => {
+                const cObj = cityData[city];
+                const topModelCity = Object.keys(cObj.models).reduce((a, b) => cObj.models[a] > cObj.models[b] ? a : b);
+                const topPayCity = Object.keys(cObj.payMethods).reduce((a, b) => cObj.payMethods[a] > cObj.payMethods[b] ? a : b);
+                const avgTicket = cObj.revenue / cObj.count;
+
+                container.innerHTML += `
+                    <div class="bg-porsche-card border border-porsche-border p-4 rounded-lg flex flex-col justify-between hover:border-porsche-red/40 transition">
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <h4 class="text-sm font-bold text-white flex items-center gap-1.5">
+                                    <i class="fa-solid fa-location-dot text-porsche-red text-xs"></i> ${city}
+                                </h4>
+                                <span class="text-xs font-semibold text-porsche-red bg-porsche-red/10 px-2 py-0.5 rounded">${cObj.count} vds</span>
+                            </div>
+                            <div class="space-y-1.5 text-xs text-porsche-grayText mt-3">
+                                <p><strong class="text-white">Mais Vendido:</strong> <span class="text-porsche-red font-medium">${topModelCity}</span> (${cObj.models[topModelCity]} un.)</p>
+                                <p><strong class="text-white">Pagamento Pop.:</strong> ${topPayCity}</p>
+                                <p><strong class="text-white">Ticket Médio:</strong> ${formatCurrency(avgTicket)}</p>
+                            </div>
+                        </div>
+                        <div class="mt-4 pt-2 border-t border-porsche-border text-xs text-porsche-grayText flex justify-between">
+                            <span>Faturamento:</span>
+                            <span class="font-bold text-white">${formatCurrency(cObj.revenue)}</span>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function updateTable(data) {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+            document.getElementById('tableCount').innerText = `${data.length} transações`;
+
+            if (data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="py-6 text-center text-porsche-grayText">Nenhum registro encontrado.</td></tr>`;
+                return;
+            }
+
+            data.forEach(item => {
+                tbody.innerHTML += `
+                    <tr class="hover:bg-porsche-surface/60 transition">
+                        <td class="py-3 px-4 font-mono text-xs text-porsche-red font-bold">${item.id}</td>
+                        <td class="py-3 px-4 text-xs text-porsche-grayText">${item.date}</td>
+                        <td class="py-3 px-4 font-bold text-white">${item.model}</td>
+                        <td class="py-3 px-4 text-porsche-grayText text-xs">${item.version}</td>
+                        <td class="py-3 px-4 font-semibold text-white">${formatCurrency(item.price)}</td>
+                        <td class="py-3 px-4 text-porsche-grayText">${item.city}</td>
+                        <td class="py-3 px-4 text-xs">
+                            <span class="px-2 py-0.5 rounded border border-porsche-border bg-porsche-card text-porsche-lightText">${item.payMethod}</span>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function updateCharts(data) {
+            // CHART 1: Models by City
+            const cityModelCounts = {};
+            data.forEach(item => {
+                if (!cityModelCounts[item.city]) cityModelCounts[item.city] = {};
+                cityModelCounts[item.city][item.model] = (cityModelCounts[item.city][item.model] || 0) + 1;
+            });
+
+            const cities = Object.keys(cityModelCounts).sort();
+            const allModels = ['911', 'Taycan', 'Cayenne', 'Macan', 'Panamera', '718'];
+            const colors = {
+                '911': '#d5001c',
+                'Taycan': '#38bdf8',
+                'Cayenne': '#fbbf24',
+                'Macan': '#a3e635',
+                'Panamera': '#c084fc',
+                '718': '#fb923c'
+            };
+
+            const datasetsQ1 = allModels.map(model => ({
+                label: model,
+                data: cities.map(city => cityModelCounts[city][model] || 0),
+                backgroundColor: colors[model],
+                borderRadius: 3
+            }));
+
+            const ctx1 = document.getElementById('chartModelsByCity').getContext('2d');
+            if (chartModelsByCityInstance) chartModelsByCityInstance.destroy();
+
+            chartModelsByCityInstance = new Chart(ctx1, {
+                type: 'bar',
+                data: { labels: cities.length > 0 ? cities : ['Nenhum'], datasets: datasetsQ1 },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { color: '#a1a1aa', boxWidth: 10, font: { size: 10 } } },
+                        tooltip: { backgroundColor: '#18181b', titleColor: '#fff', bodyColor: '#f4f4f5', borderColor: '#27272a', borderWidth: 1 }
+                    },
+                    scales: {
+                        x: { stacked: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#a1a1aa', font: { size: 10 } } },
+                        y: { stacked: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#a1a1aa', precision: 0 } }
+                    }
+                }
+            });
+
+            // CHART 4: Payment Method by Price Tier (<$100k, $100k-$180k, >$180k)
+            const priceTiers = ['< US$ 100k', 'US$ 100k - 180k', '> US$ 180k'];
+            const tierPayCounts = {
+                '< US$ 100k': { 'À Vista': 0, 'Financiamento': 0, 'Leasing': 0 },
+                'US$ 100k - 180k': { 'À Vista': 0, 'Financiamento': 0, 'Leasing': 0 },
+                '> US$ 180k': { 'À Vista': 0, 'Financiamento': 0, 'Leasing': 0 }
+            };
+
+            data.forEach(item => {
+                let tier = '';
+                if (item.price < 100000) tier = '< US$ 100k';
+                else if (item.price <= 180000) tier = 'US$ 100k - 180k';
+                else tier = '> US$ 180k';
+
+                if (tierPayCounts[tier] && tierPayCounts[tier][item.payMethod] !== undefined) {
+                    tierPayCounts[tier][item.payMethod] += 1;
+                }
+            });
+
+            const payMethods = ['À Vista', 'Financiamento', 'Leasing'];
+            const payColors = {
+                'À Vista': '#d5001c',
+                'Financiamento': '#a1a1aa',
+                'Leasing': '#3f3f46'
+            };
+
+            const datasetsQ4 = payMethods.map(pm => ({
+                label: pm,
+                data: priceTiers.map(tier => tierPayCounts[tier][pm]),
+                backgroundColor: payColors[pm],
+                borderRadius: 3
+            }));
+
+            const ctx4 = document.getElementById('chartPaymentByPriceTier').getContext('2d');
+            if (chartPaymentByPriceTierInstance) chartPaymentByPriceTierInstance.destroy();
+
+            chartPaymentByPriceTierInstance = new Chart(ctx4, {
+                type: 'bar',
+                data: { labels: priceTiers, datasets: datasetsQ4 },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { color: '#a1a1aa', boxWidth: 10, font: { size: 10 } } },
+                        tooltip: { backgroundColor: '#18181b', titleColor: '#fff', bodyColor: '#f4f4f5', borderColor: '#27272a', borderWidth: 1 }
+                    },
+                    scales: {
+                        x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#a1a1aa', font: { size: 10 } } },
+                        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#a1a1aa', precision: 0 } }
+                    }
+                }
+            });
+
+            // CHART 5: Evolution by Model (Faturamento/Volume Over Years 2024 - 2027)
+            const years = ['2024', '2025', '2026', '2027'];
+            const modelYearRevenue = {};
+
+            allModels.forEach(m => {
+                modelYearRevenue[m] = { '2024': 0, '2025': 0, '2026': 0, '2027': 0 };
+            });
+
+            data.forEach(item => {
+                const yr = item.date.substring(0, 4);
+                if (modelYearRevenue[item.model] && modelYearRevenue[item.model][yr] !== undefined) {
+                    modelYearRevenue[item.model][yr] += item.price;
+                }
+            });
+
+            const datasetsQ5 = allModels.map(model => ({
+                label: model,
+                data: years.map(yr => modelYearRevenue[model][yr]),
+                borderColor: colors[model],
+                backgroundColor: colors[model],
+                borderWidth: 2,
+                tension: 0.3,
+                pointRadius: 4
+            }));
+
+            const ctx5 = document.getElementById('chartEvolutionByModel').getContext('2d');
+            if (chartEvolutionByModelInstance) chartEvolutionByModelInstance.destroy();
+
+            chartEvolutionByModelInstance = new Chart(ctx5, {
+                type: 'line',
+                data: { labels: years, datasets: datasetsQ5 },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { color: '#a1a1aa', boxWidth: 10, font: { size: 10 } } },
+                        tooltip: { 
+                            backgroundColor: '#18181b', 
+                            titleColor: '#fff', 
+                            bodyColor: '#f4f4f5', 
+                            borderColor: '#27272a', 
+                            borderWidth: 1,
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.dataset.label}: ${formatCurrency(context.raw)}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#a1a1aa', font: { size: 10 } } },
+                        y: { 
+                            grid: { color: 'rgba(255,255,255,0.05)' }, 
+                            ticks: { 
+                                color: '#a1a1aa',
+                                callback: function(value) { return 'US$ ' + (value / 1000) + 'k'; }
+                            } 
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
